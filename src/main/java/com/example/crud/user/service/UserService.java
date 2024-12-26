@@ -1,30 +1,26 @@
 package com.example.crud.user.service;
 
 import com.example.crud.user.domain.UserEntity;
-import com.example.crud.user.dto.UserRequestDto;
+import com.example.crud.user.dto.UserDto;
 import com.example.crud.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserEntity save(UserRequestDto dto) {
-        UserEntity userEntity = userRepository.save(UserEntity.builder()
-                .username(dto.getUsername())
-                // 패스워드 암호화
-                .password(bCryptPasswordEncoder.encode(dto.getPassword()))
-                .auth("ROLE_USER")  // 기본 권한 설정
-                .build());
-        return userEntity;
+    public UserEntity registerUser(UserDto userDto) {
+        UserEntity user = new UserEntity();
+        user.setUsername(userDto.getUsername());
+        user.setPassword(userDto.getPassword()); // 비밀번호 암호화를 추가 가능
+        return userRepository.save(user);
     }
 
-
-    public boolean checkPassword(String rawPassword, String encodedPassword) {
-        return bCryptPasswordEncoder.matches(rawPassword, encodedPassword);
+    public Optional<UserEntity> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }

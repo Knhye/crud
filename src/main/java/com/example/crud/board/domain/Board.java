@@ -1,10 +1,13 @@
 package com.example.crud.board.domain;
 
+import com.example.crud.comment.domain.Comment;
 import com.example.crud.user.domain.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,6 +37,9 @@ public class Board {
     private int likesCnt = 0;
 
     private String tag;
+
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     public void incrementLikes() {
         this.likesCnt++;

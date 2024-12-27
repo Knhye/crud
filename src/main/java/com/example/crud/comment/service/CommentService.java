@@ -30,7 +30,7 @@ public class CommentService {
 
     public CommentDto findByBoardIdAndId(Long boardId, Long id) {
         CommentDto comment = commentRepository.findByBoardIdAndId(boardId, id)
-                .orElseThrow(() -> new IllegalArgumentException("Board NOT Found"));
+                .orElseThrow(() -> new IllegalArgumentException("Comment NOT Found"));
         return new CommentDto(
                 comment.getId(),
                 comment.getContent(),
@@ -68,7 +68,11 @@ public class CommentService {
 
     public CommentDto updateComment(Long commentId, CommentRequestDto requestDto) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 id의 댓글이 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("There is no comment for that ID."));
+
+        if (!comment.getPassword().equals(requestDto.getPassword())) {
+            throw new IllegalArgumentException("Password does not match.");
+        }
 
         comment.setContent(requestDto.getContent());
         comment.setDate(LocalDateTime.now());
@@ -84,31 +88,33 @@ public class CommentService {
         );
     }
 
-    public void deleteComment(Long boardId, Long commentId) {
-        // 댓글 조회
+    public void deleteComment(Long boardId, Long commentId, String password) {
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + commentId));
 
-        // 댓글이 해당 게시글에 속하는지 확인
         if (!comment.getBoard().getId().equals(boardId)) {
             throw new IllegalArgumentException("The comment does not belong to the specified board.");
         }
 
-        // 댓글 삭제
+        if (!comment.getPassword().equals(password)) {
+            throw new IllegalArgumentException("Password does not match.");
+        }
+
         commentRepository.delete(comment);
     }
 
     @Transactional
     public void likePost(Long boardId) {
         Comment comment = commentRepository.findById(boardId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("Comment Not Found."));
         comment.incrementLikes();
     }
 
     @Transactional
     public void unlikePost(Long boardId) {
         Comment comment = commentRepository.findById(boardId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("Comment Not Found."));
         comment.decrementLikes();
     }
 

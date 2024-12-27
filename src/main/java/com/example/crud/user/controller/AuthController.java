@@ -28,7 +28,6 @@ public class AuthController {
         UserEntity savedUser = userService.registerUser(userDto);
         Map<String, String> response = new HashMap<>();
         response.put("username", savedUser.getUsername());
-        response.put("password", savedUser.getPassword());
         return ResponseEntity.ok(response);
     }
 
@@ -37,7 +36,7 @@ public class AuthController {
         UserEntity foundUser = userService.findByUsername(userDto.getUsername())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
-        if (!foundUser.getPassword().equals(userDto .getPassword())) { // 비밀번호 확인
+        if (!userService.validatePassword(userDto.getPassword(), foundUser.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
@@ -45,7 +44,6 @@ public class AuthController {
         Map<String, String> response = new HashMap<>();
         response.put("token", token);
         response.put("username", foundUser.getUsername());
-        response.put("password", foundUser.getPassword());
         return ResponseEntity.ok(response);
     }
 }
